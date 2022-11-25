@@ -1,9 +1,12 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_user
+from .models import User
 import mysql.connector
 from hashlib import sha256
 
 auth = Blueprint('auth', __name__)
+
+#users = {}
 
 def retrieve_query_single(query):
     # helper function to establish connection and retrieve queries
@@ -44,7 +47,11 @@ def login_post():
     if user == None or not validate_password(email, password):
         flash('Please check your login details and try again.')
         return redirect(url_for('auth.login'))
-    
+    uid = retrieve_query_single(f"select id from user where email = '{email}'")
+    name = retrieve_query_single(f"select name from user where email = '{email}'") 
+    user = User(uid, email, name, password)
+    login_user(user, remember=remember)
+
     return redirect(url_for('main.profile'))
 
 @auth.route('/signup')

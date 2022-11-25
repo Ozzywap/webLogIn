@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_login import LoginManager
 from flask_mysqldb import MySQL
+from .auth import retrieve_query_single
 
 
 def create_app():
@@ -22,8 +23,13 @@ def create_app():
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
 
+    from .models import User
+
     @login_manager.user_loader
     def load_user(user_id):
-        return -1
+        uid = retrieve_query_single(f"select id from user where email = '{email}'")
+        # where is the user_id coming from?
+        user = User()
+        return User.get()
 
     return app
